@@ -1,3 +1,9 @@
+*.tpl
+*.tpl.*.json
+*.js.map
+!bare.tpl
+#dist
+
 # Logs
 logs
 *.log
@@ -80,7 +86,7 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+#dist
 
 # Gatsby files
 .cache/
