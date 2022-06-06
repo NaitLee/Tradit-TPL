@@ -1,5 +1,6 @@
 
 export const PLUGIN_PATH = './plugins/Tradit-TPL/';
+export const SECTION_URI = '/~';
 export const NULL_NUMBER = NaN;
 export const NULL_STRING = '\x00';
 export const NULL_INT = -1;

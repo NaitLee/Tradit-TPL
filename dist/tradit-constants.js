@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.PLUGIN_PATH = void 0;
+exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.PLUGIN_PATH = void 0;
 exports.PLUGIN_PATH = './plugins/Tradit-TPL/';
+exports.SECTION_URI = '/~';
 exports.NULL_NUMBER = NaN;
 exports.NULL_STRING = '\x00';
 exports.NULL_INT = -1;

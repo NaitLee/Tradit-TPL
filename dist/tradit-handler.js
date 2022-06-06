@@ -32,7 +32,12 @@ class Handler {
             file_list: api.require('./api.file_list').file_list,
             fs: api.require('fs')
         };
+        this.interpreter = null;
         let path = api.getConfig('path');
+        if (path.endsWith('/')) {
+            api.log('Please select a template in plugin configuration, and restart');
+            return;
+        }
         let is_debug = api.getConfig('debug') & tradit_constants_1.DebugFlags.Debug;
         if (!path.includes('/'))
             path = tradit_constants_1.PLUGIN_PATH + path;
@@ -53,14 +58,15 @@ class Handler {
             api.log(`using template '${path}'`);
             api.log(`Ready`);
         });
-        this.interpreter = null;
     }
     async handle(ctx) {
         if (!this.interpreter)
             return;
-        if (!ctx.path.endsWith('/') && !(ctx.path.startsWith('/~') && !ctx.path.startsWith('/~/')))
+        if (!ctx.path.endsWith('/') && // file serving is by HFS
+            !ctx.path.startsWith(tradit_constants_1.SECTION_URI) // special uris are filtered in plugin.ts
+        )
             return;
-        let section_name = ctx.path.startsWith('/~') ? ctx.path.slice(2) : '';
+        let section_name = ctx.path.startsWith(tradit_constants_1.SECTION_URI) ? ctx.path.slice(2) : '';
         let id = this.interpreter.getSectionIndex(section_name);
         let entry_generator = null;
         entry_generator =

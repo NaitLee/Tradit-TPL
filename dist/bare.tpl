@@ -1,6 +1,7 @@
 
 []
 <!DOCTYPE html>
+<!-- Template License: CC0 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,17 +11,8 @@
 </head>
 <body>
     <main>
-        <p>{.breadcrumbs| <a href="%bread-url%">%bread-name%</a> &gt;.}</p>
-        <table>
-            <thead>
-                <tr>
-                    <td>Item</td>
-                    <td>Last Modified</td>
-                    <td>Size</td>
-                </tr>
-            </thead>
-            <tbody>%files%</tbody>
-        </table>
+        <p>{.breadcrumbs|<a href="%bread-url%">%bread-name%</a> &gt; .}</p>
+        %files%
     </main>
     <div class="overlay">
         <div id="player" class="hidden">
@@ -28,18 +20,31 @@
             <span></span>
         </div>
     </div>
-    <script src="/~player.js"></script>
+    <div class="blank"></div>
+    <footer>
+        <p class="hidden"><a href="/~jslicense.html" data-jslicense="1">JavaScript License Information</a></p>
+    </footer>
+    <script src="/~main.js"></script>
 </body>
 </html>
 
 [files]
-%list%
+<table>
+    <thead>
+        <tr>
+            <td>Item</td>
+            <td>Last Modified</td>
+            <td>Size</td>
+        </tr>
+    </thead>
+    <tbody>%list%</tbody>
+</table>
 
 [file]
 <tr class="file">
     <td><a href="%item-url%">%item-name%</a></td>
     <td>%item-modified%</td>
-    <td><span>%item-size%B</span></td>
+    <td>%item-size%B</td>
 </tr>
 
 [folder]
@@ -83,6 +88,15 @@ td {
 
 table {
     min-width: 100%;
+    white-space: nowrap;
+}
+
+table tr {
+    outline: 1px solid transparent;
+    transition: outline 0.3s ease;
+}
+table tr:hover {
+    outline: 1px solid var(--front-color);
 }
 
 table td:nth-child(1) {
@@ -95,12 +109,19 @@ table td:nth-child(2) {
     width: 12em;
 }
 table td:nth-child(3) {
-    text-align: end;
-    width: 6em;
-    white-space: nowrap;
-}
-table .folder td:nth-child(3) {
     text-align: center;
+    width: 5em;
+}
+table tr.file td:nth-child(3) {
+    text-align: end;
+}
+footer {
+    font-size: small;
+    text-align: center;
+}
+
+.blank {
+    height: 10em;
 }
 
 .hidden {
@@ -142,14 +163,32 @@ table .folder td:nth-child(3) {
 
 /**/</style>*/
 
+[main.js|public]
+//<script>
+const Format = {
+    audio: ['.mp3', '.ogg', '.flac', '.wav']    // and many more
+};
+
+function loadScript(path) {
+    let script = document.createElement('script');
+    script.src = path;
+    document.body.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (Format.audio.some(s => document.querySelector('a[href$="' + s + '"]')))
+        loadScript('/~player.js');
+});
+
+//</script>
+
 [player.js|public]
 //<script>
 
-document.addEventListener('DOMContentLoaded', () => {
-    const Format = {
-        audio: ['.mp3', '.ogg', '.flac', '.wav'] // many more
-    };
+(function() {
     let songs = [];
+    let songs_shuffled;
+    let shuffle = false;
     let player = document.getElementById('player');
     let player_label = player.querySelector(':nth-child(2)');
     let audio = new Audio();
@@ -157,18 +196,52 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('table .file td:nth-child(1) a').forEach(e => {
         if (Format.audio.some(s => e.href.endsWith(s))) songs.push(e.href);
     });
+    songs_shuffled = songs.concat().sort((a, b) => Math.random() - 0.5);
+    const play_next = () => {
+        player_label.innerText = decodeURI(audio.src = (shuffle ? songs_shuffled : songs)[song_index++]).split('/').at(-1);
+        audio.play();
+        if (song_index >= songs.length) song_index = 0;
+    }
     if (songs.length !== 0) {
         player.classList.remove('hidden');
-        player.addEventListener('click', () => {
-            player_label.innerText = decodeURI(audio.src = songs[song_index++]).split('/').at(-1);
-            audio.play();
-            if (song_index >= songs.length) song_index = 0;
-        });
+        player.addEventListener('click', play_next);
         player.addEventListener('contextmenu', (event) => {
             audio.paused ? audio.play() : audio.pause();
             event.preventDefault();
         });
+        player.addEventListener('auxclick', (event) => {
+            shuffle = !shuffle;
+            play_next();
+            event.preventDefault();
+        });
+        audio.addEventListener('ended', play_next);
     }
-});
+})();
 
 //</script>
+
+[jslicense.html|public]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript License Information</title>
+</head>
+<body>
+    <table id="jslicense-labels1">
+        <tbody>
+            <tr>
+                <td><a href="/~main.js">main.js</a></td>
+                <td><a href="http://creativecommons.org/publicdomain/zero/1.0/legalcode">CC0-1.0</a></td>
+                <td><a href="/~main.js">main.js</a></td>
+            </tr>
+            <tr>
+                <td><a href="/~player.js">player.js</a></td>
+                <td><a href="http://creativecommons.org/publicdomain/zero/1.0/legalcode">CC0-1.0</a></td>
+                <td><a href="/~player.js">player.js</a></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

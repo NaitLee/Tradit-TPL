@@ -74,6 +74,8 @@ type FieldDescriptor = {
     max?: number;
     options?: { [label: string]: any };
     multiselect?: boolean;
+    defaultPath?: string;
+    fileMask?: string;
 };
 
 interface HFSAPI {

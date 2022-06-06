@@ -15,7 +15,9 @@ exports.config = {
         type: 'real_path',
         label: 'Template',
         helperText: 'Path to template file',
-        defaultValue: PLUGIN_PATH
+        defaultValue: PLUGIN_PATH,
+        defaultPath: '__dirname',
+        fileMask: '*.tpl'
     },
     debug: {
         type: 'number',
@@ -29,7 +31,7 @@ exports.init = function(api) {
     const handler = new Handler(exports, api);
     return {
         middleware: async function(ctx) {
-            if (ctx.path.startsWith('/~/')) return;
+            if (ctx.path.startsWith(api.const.SPECIAL_URI)) return;
             return await handler.handle(ctx);
         }
     };

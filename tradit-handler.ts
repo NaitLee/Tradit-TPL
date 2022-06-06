@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Readable, ReadableOptions } from 'stream';
 import { assemblize } from './tradit-assemblizer';
 import { serialize } from './tradit-serializer';
-import { DebugFlags, Mimetype, PLUGIN_PATH } from './tradit-constants';
+import { DebugFlags, Mimetype, PLUGIN_PATH, SECTION_URI } from './tradit-constants';
 import { Interpreter } from './tradit-interpreter';
 import { once } from 'events';
 
@@ -34,7 +34,12 @@ export class Handler {
             file_list: api.require('./api.file_list').file_list,
             fs: api.require('fs')
         };
+        this.interpreter = null;
         let path: string = api.getConfig('path');
+        if (path.endsWith('/')) {
+            api.log('Please select a template in plugin configuration, and restart');
+            return;
+        }
         let is_debug = api.getConfig('debug') & DebugFlags.Debug;
         if (!path.includes('/')) path = PLUGIN_PATH + path;
         HFS.fs.readFile(path, {
@@ -54,12 +59,14 @@ export class Handler {
             api.log(`using template '${path}'`);
             api.log(`Ready`);
         });
-        this.interpreter = null;
     }
     async handle(ctx: KoaContext) {
         if (!this.interpreter) return;
-        if (!ctx.path.endsWith('/') && !(ctx.path.startsWith('/~') && !ctx.path.startsWith('/~/'))) return;
-        let section_name = ctx.path.startsWith('/~') ? ctx.path.slice(2) : '';
+        if (
+            !ctx.path.endsWith('/') && // file serving is by HFS
+            !ctx.path.startsWith(SECTION_URI) // special uris are filtered in plugin.ts
+        ) return;
+        let section_name = ctx.path.startsWith(SECTION_URI) ? ctx.path.slice(2) : '';
         let id = this.interpreter.getSectionIndex(section_name);
         let entry_generator: FileEntryGenerator | APIError | null = null;
         entry_generator =

@@ -110,7 +110,7 @@ new Macro('breadcrumbs', c => {
         let template = s_template ?? d.s.nextString();
         let parts = decodeURI(d.c.path).split('/');
         if (parts.at(-1) === '') parts.pop();
-        let bread, result = '';
+        let bread: string, result = '';
         for (let i = 0; i < parts.length; i++) {
             bread = template
                 .replace('%bread-url%', parts.slice(0, i + 1).join('/') + '/')

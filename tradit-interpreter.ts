@@ -442,6 +442,7 @@ export class Interpreter {
         let list = this.routines[id];
         let size = list.length;
         for (let i = 0; i < size; i++) {
+            if (macro_context.c.aborted) break;
             await list[i](macro_context);
             if (macro_context.b || macro_context.d)
                 break;
@@ -456,6 +457,7 @@ export class Interpreter {
         let list = this.routines[id];
         let size = list.length;
         for (let i = 0; i < size; i++) {
+            if (macro_context.c.aborted) break;
             await list[i](macro_context);
             if (macro_context.b || macro_context.d)
                 break;

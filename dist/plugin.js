@@ -11,7 +11,9 @@ exports.config = {
         type: 'real_path',
         label: 'Template',
         helperText: 'Path to template file',
-        defaultValue: tradit_constants_1.PLUGIN_PATH
+        defaultValue: tradit_constants_1.PLUGIN_PATH,
+        defaultPath: '__dirname',
+        fileMask: '*.tpl'
     },
     debug: {
         type: 'number',
@@ -24,7 +26,7 @@ exports.init = function (api) {
     const handler = new tradit_handler_1.Handler(exports, api);
     return {
         middleware: async function (ctx) {
-            if (ctx.path.startsWith('/~/'))
+            if (ctx.path.startsWith(api.const.SPECIAL_URI))
                 return;
             return await handler.handle(ctx);
         }
