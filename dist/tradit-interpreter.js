@@ -35,50 +35,51 @@ class MacroParameters {
         this.map.push(role);
         this.order.push(tradit_constants_1.StackType.Group);
     }
-    nextNumber() {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextNumber(pop = false) {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return tradit_constants_1.NULL_NUMBER;
         }
         let value = tradit_constants_1.NULL_NUMBER;
         if (role & tradit_constants_1.ItemRole.Plain) {
             value = type === tradit_constants_1.StackType.Number
-                ? this.numbers.shift()
-                : parseFloat(this.strings.shift());
+                ? (pop ? this.numbers.pop() : this.numbers.shift())
+                : parseFloat((pop ? this.strings.pop() : this.strings.shift()));
             if (isNaN(value)) {
-                console.warn(`warning: encountered NaN in nextNumber`);
+                if (1)
+                    console.warn(`warning: encountered NaN in nextNumber`);
                 value = 0;
             }
         }
         return value;
     }
-    nextString() {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextString(pop = false) {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return tradit_constants_1.NULL_STRING;
         }
         let value = tradit_constants_1.NULL_STRING;
         if (role & tradit_constants_1.ItemRole.Group) {
-            value = (0, tradit_misc_1.groupToString)(this.groups.shift(), this.interpreter.template);
+            value = (0, tradit_misc_1.groupToString)((pop ? this.groups.pop() : this.groups.shift()), this.interpreter.template);
         }
         else if (role & tradit_constants_1.ItemRole.Plain) {
             value = type === tradit_constants_1.StackType.String
-                ? this.strings.shift()
-                : this.numbers.shift().toString();
+                ? (pop ? this.strings.pop() : this.strings.shift())
+                : (pop ? this.numbers.pop() : this.numbers.shift()).toString();
         }
         return value;
     }
-    nextGroup() {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextGroup(pop = false) {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return tradit_constants_1.NULL_INT;
         }
         let value = tradit_constants_1.NULL_INT;
         if (role & tradit_constants_1.ItemRole.Group) {
-            value = this.groups.shift();
+            value = (pop ? this.groups.pop() : this.groups.shift());
         }
         return value;
     }
@@ -172,19 +173,19 @@ class MacroStack {
             this.order.push(tradit_constants_1.StackType.String);
         }
     }
-    nextNumber() {
-        if (this.order.at(-1) !== tradit_constants_1.StackType.Number) {
-            return tradit_constants_1.NULL_NUMBER;
+    nextNumber(pop = false) {
+        if (this.order.at(pop ? -1 : 0) !== tradit_constants_1.StackType.Number) {
+            return 0;
         }
-        this.order.shift();
-        return this.numbers.shift() ?? tradit_constants_1.NULL_NUMBER;
+        pop ? this.order.pop() : this.order.shift();
+        return (pop ? this.numbers.pop() : this.numbers.shift()) ?? 0;
     }
-    nextString() {
-        if (this.order.at(-1) !== tradit_constants_1.StackType.String) {
-            return tradit_constants_1.NULL_STRING;
+    nextString(pop = false) {
+        if (this.order.at(pop ? -1 : 0) !== tradit_constants_1.StackType.String) {
+            return '';
         }
-        this.order.shift();
-        return this.strings.shift() ?? tradit_constants_1.NULL_STRING;
+        pop ? this.order.pop() : this.order.shift();
+        return (pop ? this.strings.pop() : this.strings.shift()) ?? '';
     }
     drain() {
         return {

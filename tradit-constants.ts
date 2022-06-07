@@ -1,5 +1,8 @@
 
-export const PLUGIN_PATH = './plugins/Tradit-TPL/';
+export const PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
+export const PLUGIN_PATH = ['.', 'plugins', 'Tradit-TPL', ''].join(PATH_DELIM);
+export const CFG_KEY_PATH = 'path';
+export const CFG_KEY_DEBUG = 'CFG_KEY_DEBUG';
 export const SECTION_URI = '/~';
 export const NULL_NUMBER = NaN;
 export const NULL_STRING = '\x00';
@@ -26,8 +29,8 @@ export const Mimetype: {
 };
 
 export enum DebugFlags {
-    Debug = 0b1,
-    Verbose = 0b10
+    Verbose = 0b1,
+    DumpTpl = 0b10
 }
 
 export enum ItemRole {

@@ -1,8 +1,9 @@
 
 ///<reference path="./types.d.ts" />
 
-import { PLUGIN_PATH } from './tradit-constants';
+import { CFG_KEY_DEBUG, CFG_KEY_PATH, PLUGIN_PATH } from './tradit-constants';
 import { Handler } from './tradit-handler';
+import { init } from './tradit-globals';
 
 declare var exports: HFSPlugin;
 
@@ -11,7 +12,7 @@ exports.version = 1;
 exports.apiRequired = 3;
 
 exports.config = {
-    path: {
+    [CFG_KEY_PATH]: {
         type: 'real_path',
         label: 'Template',
         helperText: 'Path to template file',
@@ -19,7 +20,7 @@ exports.config = {
         defaultPath: '__dirname',
         fileMask: '*.tpl'
     },
-    debug: {
+    [CFG_KEY_DEBUG]: {
         type: 'number',
         label: 'Debug Flag',
         helperText: 'For developers only',
@@ -28,11 +29,15 @@ exports.config = {
 };
 
 exports.init = function(api) {
-    const handler = new Handler(exports, api);
+    init(exports, api);
+    const handler = new Handler();
     return {
         middleware: async function(ctx) {
             if (ctx.path.startsWith(api.const.SPECIAL_URI)) return;
             return await handler.handle(ctx);
+        },
+        unload: async function() {
+            handler.unload();
         }
     };
 }

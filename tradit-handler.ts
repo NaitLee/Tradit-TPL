@@ -1,13 +1,12 @@
 
-import * as fs from 'fs';
-import { Readable, ReadableOptions } from 'stream';
-import { assemblize } from './tradit-assemblizer';
-import { serialize } from './tradit-serializer';
-import { DebugFlags, Mimetype, PLUGIN_PATH, SECTION_URI } from './tradit-constants';
-import { Interpreter } from './tradit-interpreter';
 import { once } from 'events';
-
-var HFS: HFS<typeof fs>;
+import { Readable, ReadableOptions } from 'stream';
+import { API, Debug, HFS } from './tradit-globals';
+import { assemblize } from './tradit-assemblizer';
+import { CFG_KEY_PATH, DebugFlags, Mimetype, PATH_DELIM, PLUGIN_PATH, SECTION_URI } from './tradit-constants';
+import { Interpreter } from './tradit-interpreter';
+import { serialize } from './tradit-serializer';
+import { makePathConsistent } from './tradit-misc';
 
 export class ReadableForMacros extends Readable {
     ctx: KoaContext;
@@ -29,42 +28,54 @@ function mimetype(path: string) {
 
 export class Handler {
     interpreter: Interpreter | null;
-    constructor(public plugin: HFSPlugin, public api: HFSAPI) {
-        HFS = {
-            file_list: api.require('./api.file_list').file_list,
-            fs: api.require('fs')
-        };
+    unsubscribers: Unsubscriber[];
+    constructor() {
         this.interpreter = null;
-        let path: string = api.getConfig('path');
-        if (path.endsWith('/')) {
-            api.log('Please select a template in plugin configuration, and restart');
-            return;
+        this.unsubscribers = [];
+        let path: string = API.getConfig(CFG_KEY_PATH);
+        path = makePathConsistent(path); // i have edge case: dev on *nix but test with wine
+        if (!path.includes(PATH_DELIM)) path = PLUGIN_PATH + path;
+        API.setConfig(CFG_KEY_PATH, path);
+        this.unsubscribers.push(
+            API.subscribeConfig(CFG_KEY_PATH, this.loadTemplate.bind(this))
+        );
+    }
+    loadTemplate(path: string) {
+        if (path.endsWith(PATH_DELIM)) {
+            let possible_tpls = HFS.fs.readdirSync(path).filter(s => s.endsWith('.tpl'));
+            if (possible_tpls.length > 0) {
+                path += possible_tpls[0];
+                API.setConfig(CFG_KEY_PATH, path);
+                return; // let subscriber work
+            } else {
+                API.log('Please select a template in plugin configuration');
+                return;
+            }
         }
-        let is_debug = api.getConfig('debug') & DebugFlags.Debug;
-        if (!path.includes('/')) path = PLUGIN_PATH + path;
+        let debug_dump = Debug & DebugFlags.DumpTpl;
         HFS.fs.readFile(path, {
             encoding: 'utf-8'
         }, (err, data) => {
             if (err) {
-                api.log(`can't load template: ${err}`);
+                API.log(`can't load template: ${err}`);
                 return;
             }
             let serialized = serialize(data);
             let template = assemblize(serialized);
-            if (is_debug) {
+            if (debug_dump) {
                 HFS.fs.writeFileSync(path + '.s.json', JSON.stringify(serialized, void 0, 4), 'utf-8');
                 HFS.fs.writeFileSync(path + '.a.json', JSON.stringify(template, void 0, 4), 'utf-8');
             }
-            this.interpreter = new Interpreter(template, api);
-            api.log(`using template '${path}'`);
-            api.log(`Ready`);
+            this.interpreter = new Interpreter(template, API);
+            API.log(`using template '${path}'`);
+            API.log(`Ready`);
         });
     }
     async handle(ctx: KoaContext) {
         if (!this.interpreter) return;
         if (
             !ctx.path.endsWith('/') && // file serving is by HFS
-            !ctx.path.startsWith(SECTION_URI) // special uris are filtered in plugin.ts
+            !ctx.path.startsWith(SECTION_URI) // HFS pecial uris are filtered in plugin.ts
         ) return;
         let section_name = ctx.path.startsWith(SECTION_URI) ? ctx.path.slice(2) : '';
         let id = this.interpreter.getSectionIndex(section_name);
@@ -120,5 +131,8 @@ export class Handler {
         ctx.type = mimetype(ctx.path);
         ctx.body = readable;
         return true;
+    }
+    unload() {
+        this.unsubscribers.forEach(f => f());
     }
 }

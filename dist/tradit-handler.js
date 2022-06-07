@@ -1,13 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Handler = exports.ReadableForMacros = void 0;
+const events_1 = require("events");
 const stream_1 = require("stream");
+const tradit_globals_1 = require("./tradit-globals");
 const tradit_assemblizer_1 = require("./tradit-assemblizer");
-const tradit_serializer_1 = require("./tradit-serializer");
 const tradit_constants_1 = require("./tradit-constants");
 const tradit_interpreter_1 = require("./tradit-interpreter");
-const events_1 = require("events");
-var HFS;
+const tradit_serializer_1 = require("./tradit-serializer");
+const tradit_misc_1 = require("./tradit-misc");
 class ReadableForMacros extends stream_1.Readable {
     constructor(options) {
         super(options);
@@ -25,45 +26,53 @@ function mimetype(path) {
     return tradit_constants_1.Mimetype[suffix] ?? tradit_constants_1.Mimetype['html'];
 }
 class Handler {
-    constructor(plugin, api) {
-        this.plugin = plugin;
-        this.api = api;
-        HFS = {
-            file_list: api.require('./api.file_list').file_list,
-            fs: api.require('fs')
-        };
+    constructor() {
         this.interpreter = null;
-        let path = api.getConfig('path');
-        if (path.endsWith('/')) {
-            api.log('Please select a template in plugin configuration, and restart');
-            return;
-        }
-        let is_debug = api.getConfig('debug') & tradit_constants_1.DebugFlags.Debug;
-        if (!path.includes('/'))
+        this.unsubscribers = [];
+        let path = tradit_globals_1.API.getConfig(tradit_constants_1.CFG_KEY_PATH);
+        path = (0, tradit_misc_1.makePathConsistent)(path); // i have edge case: dev on *nix but test with wine
+        if (!path.includes(tradit_constants_1.PATH_DELIM))
             path = tradit_constants_1.PLUGIN_PATH + path;
-        HFS.fs.readFile(path, {
+        tradit_globals_1.API.setConfig(tradit_constants_1.CFG_KEY_PATH, path);
+        this.unsubscribers.push(tradit_globals_1.API.subscribeConfig(tradit_constants_1.CFG_KEY_PATH, this.loadTemplate.bind(this)));
+    }
+    loadTemplate(path) {
+        if (path.endsWith(tradit_constants_1.PATH_DELIM)) {
+            let possible_tpls = tradit_globals_1.HFS.fs.readdirSync(path).filter(s => s.endsWith('.tpl'));
+            if (possible_tpls.length > 0) {
+                path += possible_tpls[0];
+                tradit_globals_1.API.setConfig(tradit_constants_1.CFG_KEY_PATH, path);
+                return; // let subscriber work
+            }
+            else {
+                tradit_globals_1.API.log('Please select a template in plugin configuration');
+                return;
+            }
+        }
+        let debug_dump = tradit_globals_1.Debug & tradit_constants_1.DebugFlags.DumpTpl;
+        tradit_globals_1.HFS.fs.readFile(path, {
             encoding: 'utf-8'
         }, (err, data) => {
             if (err) {
-                api.log(`can't load template: ${err}`);
+                tradit_globals_1.API.log(`can't load template: ${err}`);
                 return;
             }
             let serialized = (0, tradit_serializer_1.serialize)(data);
             let template = (0, tradit_assemblizer_1.assemblize)(serialized);
-            if (is_debug) {
-                HFS.fs.writeFileSync(path + '.s.json', JSON.stringify(serialized, void 0, 4), 'utf-8');
-                HFS.fs.writeFileSync(path + '.a.json', JSON.stringify(template, void 0, 4), 'utf-8');
+            if (debug_dump) {
+                tradit_globals_1.HFS.fs.writeFileSync(path + '.s.json', JSON.stringify(serialized, void 0, 4), 'utf-8');
+                tradit_globals_1.HFS.fs.writeFileSync(path + '.a.json', JSON.stringify(template, void 0, 4), 'utf-8');
             }
-            this.interpreter = new tradit_interpreter_1.Interpreter(template, api);
-            api.log(`using template '${path}'`);
-            api.log(`Ready`);
+            this.interpreter = new tradit_interpreter_1.Interpreter(template, tradit_globals_1.API);
+            tradit_globals_1.API.log(`using template '${path}'`);
+            tradit_globals_1.API.log(`Ready`);
         });
     }
     async handle(ctx) {
         if (!this.interpreter)
             return;
         if (!ctx.path.endsWith('/') && // file serving is by HFS
-            !ctx.path.startsWith(tradit_constants_1.SECTION_URI) // special uris are filtered in plugin.ts
+            !ctx.path.startsWith(tradit_constants_1.SECTION_URI) // HFS pecial uris are filtered in plugin.ts
         )
             return;
         let section_name = ctx.path.startsWith(tradit_constants_1.SECTION_URI) ? ctx.path.slice(2) : '';
@@ -72,7 +81,7 @@ class Handler {
         entry_generator =
             this.interpreter.template.params[id].no_list || section_name
                 ? null
-                : await HFS.file_list({ path: ctx.path, omit: 'c', sse: true }, ctx);
+                : await tradit_globals_1.HFS.file_list({ path: ctx.path, omit: 'c', sse: true }, ctx);
         if (entry_generator instanceof Error) {
             switch (ctx.status = entry_generator.status) {
                 case 404:
@@ -119,6 +128,9 @@ class Handler {
         ctx.type = mimetype(ctx.path);
         ctx.body = readable;
         return true;
+    }
+    unload() {
+        this.unsubscribers.forEach(f => f());
     }
 }
 exports.Handler = Handler;

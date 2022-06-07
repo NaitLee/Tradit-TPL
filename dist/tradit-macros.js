@@ -90,6 +90,34 @@ new Macro('add', c => {
         pass ? await d.p.put(result.toString()) : d.s.pushNumber(result);
     };
 }, N);
+new Macro('replace', c => {
+    let s_result = c.p.nextString(true);
+    let args = [];
+    const pass = c.r;
+    let value1, value2;
+    while (c.p.isNotEmpty()) {
+        value1 = c.p.nextString(), value2 = c.p.nextString();
+        if (s_result !== tradit_constants_1.NULL_STRING && value1 !== tradit_constants_1.NULL_STRING && value2 !== tradit_constants_1.NULL_STRING) {
+            s_result = s_result.replace(value1, value2);
+        }
+        else {
+            args.push(value1, value2);
+        }
+    }
+    if (s_result !== tradit_constants_1.NULL_STRING && args.length === 0) {
+        if (pass)
+            return EchoPass(s_result);
+        c.q.pushString(s_result);
+        return null;
+    }
+    return async (d) => {
+        let result = s_result === tradit_constants_1.NULL_STRING ? d.s.nextString(true) : s_result;
+        for (let i = 0; i < args.length; i += 2) {
+            result = result.replace(args[i] === tradit_constants_1.NULL_STRING ? d.s.nextString() : args[i], args[i + 1] === tradit_constants_1.NULL_STRING ? d.s.nextString() : args[i + 1]);
+        }
+        pass ? await d.p.put(result) : d.s.pushString(result);
+    };
+});
 new Macro('breadcrumbs', c => {
     const s_template = c.p.nextString();
     const pass = c.r;

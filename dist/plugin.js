@@ -3,11 +3,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const tradit_constants_1 = require("./tradit-constants");
 const tradit_handler_1 = require("./tradit-handler");
+const tradit_globals_1 = require("./tradit-globals");
 exports.description = "Use an HFS 2 'template' in HFS 3 - PRE-ALPHA stage";
 exports.version = 1;
 exports.apiRequired = 3;
 exports.config = {
-    path: {
+    [tradit_constants_1.CFG_KEY_PATH]: {
         type: 'real_path',
         label: 'Template',
         helperText: 'Path to template file',
@@ -15,7 +16,7 @@ exports.config = {
         defaultPath: '__dirname',
         fileMask: '*.tpl'
     },
-    debug: {
+    [tradit_constants_1.CFG_KEY_DEBUG]: {
         type: 'number',
         label: 'Debug Flag',
         helperText: 'For developers only',
@@ -23,12 +24,16 @@ exports.config = {
     }
 };
 exports.init = function (api) {
-    const handler = new tradit_handler_1.Handler(exports, api);
+    (0, tradit_globals_1.init)(exports, api);
+    const handler = new tradit_handler_1.Handler();
     return {
         middleware: async function (ctx) {
             if (ctx.path.startsWith(api.const.SPECIAL_URI))
                 return;
             return await handler.handle(ctx);
+        },
+        unload: async function () {
+            handler.unload();
         }
     };
 };

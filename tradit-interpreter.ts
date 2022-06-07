@@ -100,49 +100,49 @@ export class MacroParameters {
         this.map.push(role);
         this.order.push(StackType.Group);
     }
-    nextNumber(): number {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextNumber(pop = false): number {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return NULL_NUMBER;
         }
         let value: number = NULL_NUMBER;
         if (role & ItemRole.Plain) {
             value = type === StackType.Number
-                ? (this.numbers.shift() as number)
-                : parseFloat(this.strings.shift() as string);
+                ? ((pop ? this.numbers.pop() : this.numbers.shift()) as number)
+                : parseFloat((pop ? this.strings.pop() : this.strings.shift()) as string);
             if (isNaN(value)) {
-                console.warn(`warning: encountered NaN in nextNumber`);
+                if (1) console.warn(`warning: encountered NaN in nextNumber`);
                 value = 0;
             }
         }
         return value;
     }
-    nextString(): string {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextString(pop = false): string {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return NULL_STRING;
         }
         let value: string = NULL_STRING;
         if (role & ItemRole.Group) {
-            value = groupToString(this.groups.shift() as number, this.interpreter.template);
+            value = groupToString((pop ? this.groups.pop() : this.groups.shift()) as number, this.interpreter.template);
         } else if (role & ItemRole.Plain) {
             value = type === StackType.String
-                ? (this.strings.shift() as string)
-                : (this.numbers.shift() as number).toString();
+                ? ((pop ? this.strings.pop() : this.strings.shift()) as string)
+                : ((pop ? this.numbers.pop() : this.numbers.shift()) as number).toString();
         }
         return value;
     }
-    nextGroup(): number {
-        let role = this.map.shift();
-        let type = this.order.shift();
+    nextGroup(pop = false): number {
+        let role = (pop ? this.map.pop() : this.map.shift());
+        let type = (pop ? this.order.pop() : this.order.shift());
         if (role === undefined || type === undefined) {
             return NULL_INT;
         }
         let value: number = NULL_INT;
         if (role & ItemRole.Group) {
-            value = this.groups.shift() as number;
+            value = (pop ? this.groups.pop() : this.groups.shift()) as number;
         }
         return value;
     }
@@ -239,19 +239,19 @@ export class MacroStack {
             this.order.push(StackType.String);
         }
     }
-    nextNumber() {
-        if (this.order.at(-1) !== StackType.Number) {
-            return NULL_NUMBER;
+    nextNumber(pop = false) {
+        if (this.order.at(pop ? -1 : 0) !== StackType.Number) {
+            return 0;
         }
-        this.order.shift();
-        return this.numbers.shift() ?? NULL_NUMBER;
+        pop ? this.order.pop() : this.order.shift();
+        return (pop ? this.numbers.pop() : this.numbers.shift()) ?? 0;
     }
-    nextString() {
-        if (this.order.at(-1) !== StackType.String) {
-            return NULL_STRING;
+    nextString(pop = false) {
+        if (this.order.at(pop ? -1 : 0) !== StackType.String) {
+            return '';
         }
-        this.order.shift();
-        return this.strings.shift() ?? NULL_STRING;
+        pop ? this.order.pop() : this.order.shift();
+        return (pop ? this.strings.pop() : this.strings.shift()) ?? '';
     }
     drain() {
         return {
@@ -288,7 +288,7 @@ export class Interpreter {
     globalVariables: { n: { [key: string]: number }, s: { [key: string]: string } };
     routines: MacroRoutine[][];
     anchors: number[][];
-    constructor(public template: AssemblizedTemplate, public api: HFSAPI) {
+    constructor(public template: AssemblizedTemplate, public api: PluginAPI) {
         this.routines = [];
         this.anchors = [];
         this.globalVariables = { n: {}, s: {} };

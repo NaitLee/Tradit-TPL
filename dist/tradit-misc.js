@@ -1,7 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.groupToString = void 0;
+exports.groupToString = exports.makePathConsistent = void 0;
 const tradit_constants_1 = require("./tradit-constants");
+function makePathConsistent(path) {
+    return path.replaceAll(process.platform === 'win32' ? '/' : '\\', tradit_constants_1.PATH_DELIM);
+}
+exports.makePathConsistent = makePathConsistent;
 function groupToString(rootid, template) {
     // NOT USEFUL AND BROKEN
     function recurse(id) {

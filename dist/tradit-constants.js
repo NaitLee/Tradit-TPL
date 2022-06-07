@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.PLUGIN_PATH = void 0;
-exports.PLUGIN_PATH = './plugins/Tradit-TPL/';
+exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.CFG_KEY_DEBUG = exports.CFG_KEY_PATH = exports.PLUGIN_PATH = exports.PATH_DELIM = void 0;
+exports.PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
+exports.PLUGIN_PATH = ['.', 'plugins', 'Tradit-TPL', ''].join(exports.PATH_DELIM);
+exports.CFG_KEY_PATH = 'path';
+exports.CFG_KEY_DEBUG = 'CFG_KEY_DEBUG';
 exports.SECTION_URI = '/~';
 exports.NULL_NUMBER = NaN;
 exports.NULL_STRING = '\x00';
@@ -24,8 +27,8 @@ exports.Mimetype = {
 };
 var DebugFlags;
 (function (DebugFlags) {
-    DebugFlags[DebugFlags["Debug"] = 1] = "Debug";
-    DebugFlags[DebugFlags["Verbose"] = 2] = "Verbose";
+    DebugFlags[DebugFlags["Verbose"] = 1] = "Verbose";
+    DebugFlags[DebugFlags["DumpTpl"] = 2] = "DumpTpl";
 })(DebugFlags = exports.DebugFlags || (exports.DebugFlags = {}));
 var ItemRole;
 (function (ItemRole) {

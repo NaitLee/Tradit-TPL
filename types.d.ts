@@ -37,7 +37,7 @@ type AssemblizedTemplate = {
 }
 
 /**
- * HFS internal things
+ * HFS internal API
  */
 interface HFS<TypeofFS> {
     file_list<T extends FileEntryGenerator | FileEntryList>(
@@ -49,6 +49,13 @@ interface HFS<TypeofFS> {
         ctx: KoaContext
     ): Promise<T | APIError>;
     fs: TypeofFS;
+    auth?: {
+        refresh_session({}, ctx: KoaContext): Promise<{
+            username: string;
+            adminUrl: string | undefined;
+            exp: Date;
+        } | APIError>;
+    }
 }
 
 // Types from HFS, **incomplete subset**
@@ -57,7 +64,7 @@ interface HFSPlugin {
     description: string;
     version: number;
     apiRequired: number;
-    init?(api: HFSAPI): Partial<HFSPlugin>;
+    init?(api: PluginAPI): Partial<HFSPlugin>;
     middleware?(ctx: KoaContext): Promise<void | true | Function>;
     unload?(): void;
     config?: { [key: string]: FieldDescriptor };
@@ -78,9 +85,14 @@ type FieldDescriptor = {
     fileMask?: string;
 };
 
-interface HFSAPI {
+type Unsubscriber = () => void;
+
+interface PluginAPI {
     require: typeof require;
     getConfig(key: string): any;
+    setConfig(key: string, value: any): any;
+    subscribeConfig(key: string, callback: (value: any) => void): Unsubscriber;
+    getHfsConfig(key: string): any;
     log(...args: string[]): void;
     const: { [key: string]: any };
     getConnections(): any[];
@@ -103,14 +115,15 @@ interface KoaContext {
     aborted: boolean;
 }
 
-interface FileListEntry {
+interface FileEntry {
     n: string;
-    m: Date;
-    s: number | undefined;
+    c?: Date;
+    m?: Date;
+    s?: number | undefined;
 }
 
-type FileEntryGenerator = AsyncGenerator<{ entry: FileListEntry }>;
-type FileEntryList = { list: { entry: FileListEntry[] } };
+type FileEntryGenerator = AsyncGenerator<{ entry: FileEntry }>;
+type FileEntryList = { list: FileEntry[] };
 
 interface APIError extends Error {
     status: number;

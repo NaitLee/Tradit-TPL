@@ -1,5 +1,9 @@
 
-import { ItemRole, MacroMarker } from "./tradit-constants";
+import { ItemRole, MacroMarker, PATH_DELIM } from "./tradit-constants";
+
+export function makePathConsistent(path: string) {
+    return path.replaceAll(process.platform === 'win32' ? '/' : '\\', PATH_DELIM);
+}
 
 export function groupToString(rootid: number, template: AssemblizedTemplate) {
     // NOT USEFUL AND BROKEN

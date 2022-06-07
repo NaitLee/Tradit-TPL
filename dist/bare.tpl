@@ -11,7 +11,7 @@
 </head>
 <body>
     <main>
-        <p>{.breadcrumbs|<a href="%bread-url%">%bread-name%</a> &gt; .}</p>
+        <p>{.replace|<a href="/">/</a>|<a href="/">Home</a>|{.breadcrumbs|<a href="%bread-url%">%bread-name%</a> &gt; .}.}</p>
         %files%
     </main>
     <div class="overlay">
