@@ -17,13 +17,15 @@ For it's way too early, not put to HFS "search online" list yet.
   Couldn't wait anymore? Follow its guide to build, not that difficult.
 1. Clone (or download archive of) this repository
 2. Copy the `dist` folder to HFS plugin folder, rename as `Tradit-TPL`
-3. Launch HFS, go to admin UI, Plugin panel
-4. Enable this plugin **and** configure it, pick a template  
-  A minimal template `bare.tpl` is inside plugin folder. Use it.
-5. Stop & start the plugin again
-6. Go to "Shared Files" panel, put some files/folders
-7. Browse files. See if it works
-8. (With `bare.tpl`) prepare & go to a folder with music files, and enjoy the music player
+3. Launch HFS, go to admin UI, Plugin panel, enable this plugin  
+  First start will auto search & use `bare.tpl` for demo purpose
+4. Go to "Shared Files" panel, put some files/folders
+5. Browse files. See if it works
+6. prepare & go to a folder with music files, and enjoy the music player
+
+To change template, in Plugin panel, configure this plugin and pick other desired template file.
+
+But currently *none* of existing templates will work perfectly.
 
 ## Dev
 
