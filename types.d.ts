@@ -64,6 +64,8 @@ interface HFSPlugin {
     description: string;
     version: number;
     apiRequired: number;
+    frontend_css?: string | string[];
+    frontend_js?: string | string[];
     init?(api: PluginAPI): Partial<HFSPlugin>;
     middleware?(ctx: KoaContext): Promise<void | true | Function>;
     unload?(): void;
@@ -117,6 +119,7 @@ interface KoaContext {
 
 interface FileEntry {
     n: string;
+    t?: Date;
     c?: Date;
     m?: Date;
     s?: number | undefined;

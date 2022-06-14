@@ -4,6 +4,10 @@
 !bare.tpl
 #dist
 
+.directory
+thumbs.db
+thumbs.db:encryptable
+
 # Logs
 logs
 *.log

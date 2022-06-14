@@ -72,7 +72,7 @@ class Handler {
         if (!this.interpreter)
             return;
         if (!ctx.path.endsWith('/') && // file serving is by HFS
-            !ctx.path.startsWith(tradit_constants_1.SECTION_URI) // HFS pecial uris are filtered in plugin.ts
+            !ctx.path.startsWith(tradit_constants_1.SECTION_URI) // HFS special uris are filtered in plugin.ts
         )
             return;
         let section_name = ctx.path.startsWith(tradit_constants_1.SECTION_URI) ? ctx.path.slice(2) : '';
@@ -131,6 +131,7 @@ class Handler {
     }
     unload() {
         this.unsubscribers.forEach(f => f());
+        this.unsubscribers.length = 0;
     }
 }
 exports.Handler = Handler;

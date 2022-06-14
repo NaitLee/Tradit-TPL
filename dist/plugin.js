@@ -6,14 +6,14 @@ const tradit_handler_1 = require("./tradit-handler");
 const tradit_globals_1 = require("./tradit-globals");
 exports.description = "Use an HFS 2 'template' in HFS 3 - PRE-ALPHA stage";
 exports.version = 1;
-exports.apiRequired = 3;
+exports.apiRequired = 4;
 exports.config = {
     [tradit_constants_1.CFG_KEY_PATH]: {
         type: 'real_path',
         label: 'Template',
         helperText: 'Path to template file',
         defaultValue: tradit_constants_1.PLUGIN_PATH,
-        defaultPath: '__dirname',
+        defaultPath: tradit_constants_1.PLUGIN_PATH,
         fileMask: '*.tpl'
     },
     [tradit_constants_1.CFG_KEY_DEBUG]: {

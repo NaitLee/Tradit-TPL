@@ -9,7 +9,7 @@ declare var exports: HFSPlugin;
 
 exports.description = "Use an HFS 2 'template' in HFS 3 - PRE-ALPHA stage";
 exports.version = 1;
-exports.apiRequired = 3;
+exports.apiRequired = 4;
 
 exports.config = {
     [CFG_KEY_PATH]: {
@@ -17,7 +17,7 @@ exports.config = {
         label: 'Template',
         helperText: 'Path to template file',
         defaultValue: PLUGIN_PATH,
-        defaultPath: '__dirname',
+        defaultPath: PLUGIN_PATH,
         fileMask: '*.tpl'
     },
     [CFG_KEY_DEBUG]: {

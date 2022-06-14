@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.CFG_KEY_DEBUG = exports.CFG_KEY_PATH = exports.PLUGIN_PATH = exports.PATH_DELIM = void 0;
 exports.PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
-exports.PLUGIN_PATH = ['.', 'plugins', 'Tradit-TPL', ''].join(exports.PATH_DELIM);
+exports.PLUGIN_PATH = __dirname + exports.PATH_DELIM;
 exports.CFG_KEY_PATH = 'path';
-exports.CFG_KEY_DEBUG = 'CFG_KEY_DEBUG';
+exports.CFG_KEY_DEBUG = 'debug';
 exports.SECTION_URI = '/~';
 exports.NULL_NUMBER = NaN;
 exports.NULL_STRING = '\x00';

@@ -1,8 +1,8 @@
 
 export const PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
-export const PLUGIN_PATH = ['.', 'plugins', 'Tradit-TPL', ''].join(PATH_DELIM);
+export const PLUGIN_PATH = __dirname + PATH_DELIM;
 export const CFG_KEY_PATH = 'path';
-export const CFG_KEY_DEBUG = 'CFG_KEY_DEBUG';
+export const CFG_KEY_DEBUG = 'debug';
 export const SECTION_URI = '/~';
 export const NULL_NUMBER = NaN;
 export const NULL_STRING = '\x00';
