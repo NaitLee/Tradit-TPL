@@ -1,7 +1,7 @@
 
 import { Macro, Macros } from "./tradit-macros";
 import { ItemRole as ItemRole, NULL_INT, NULL_NUMBER, NULL_STRING, StackType } from "./tradit-constants";
-import { ReadableForMacros } from "./tradit-handler";
+import { ReadableForMacros, SendListReadable } from "./tradit-handler";
 import { groupToString } from "./tradit-misc";
 // import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 
@@ -61,7 +61,7 @@ export interface MacroRoutineContext {
     /** interpreter instance */
     i: Interpreter;
     /** file entry generator, if available */
-    l: FileEntryGenerator | null;
+    l: SendListReadable | null;
     /** koa context */
     c: KoaContext;
     /** pass-through readable body */
@@ -428,7 +428,7 @@ export class Interpreter {
             r: false, t: this.template, i: this
         };
     }
-    newRoutineContext(readable: ReadableForMacros, entry_generator: FileEntryGenerator | null): MacroRoutineContext {
+    newRoutineContext(readable: ReadableForMacros, entry_generator: SendListReadable | null): MacroRoutineContext {
         return {
             s: new MacroStack(), l: entry_generator,
             vn: Object.setPrototypeOf({}, this.globalVariables.n),
@@ -483,13 +483,13 @@ export class Interpreter {
         ctx.s = old_stack;
         return result;
     }
-    getSectionGenerator(name: string, readable: ReadableForMacros, entry_generator: FileEntryGenerator | null, allow_private = false) {
+    getSectionGenerator(name: string, readable: ReadableForMacros, entry_generator: SendListReadable | null, allow_private = false) {
         let index = this.getSectionIndex(name, allow_private);
         if (index === -1) return null;
         let ctx = this.newRoutineContext(readable, entry_generator);
         return this.getGroupGenerator(index, ctx);
     }
-    getSection(name: string, readable: ReadableForMacros, entry_generator: FileEntryGenerator | null, allow_private = false) {
+    getSection(name: string, readable: ReadableForMacros, entry_generator: SendListReadable | null, allow_private = false) {
         let index = this.getSectionIndex(name, allow_private);
         if (index === -1) return null;
         let ctx = this.newRoutineContext(readable, entry_generator);

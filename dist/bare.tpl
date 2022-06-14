@@ -245,3 +245,19 @@ document.addEventListener('DOMContentLoaded', () => {
     </table>
 </body>
 </html>
+
+[not found]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Not Found</title>
+    <link rel="stylesheet" href="/~style.css" />
+</head>
+<body>
+    <p>Not Found</p>
+    <p><a href="../">&lt; Go Back</a></p>
+</body>
+</html>
+

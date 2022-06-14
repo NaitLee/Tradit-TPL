@@ -15,6 +15,7 @@ class ReadableForMacros extends stream_1.Readable {
         this.ctx = options.ctx;
     }
     async put(item) {
+        // Note: this is useless. Will find a better solution
         if (!this.push(item)) {
             await (0, events_1.once)(this, 'readable');
         }
@@ -45,7 +46,7 @@ class Handler {
                 return; // let subscriber work
             }
             else {
-                tradit_globals_1.API.log('Please select a template in plugin configuration');
+                tradit_globals_1.API.log('Please manually select a template in plugin configuration');
                 return;
             }
         }
@@ -77,37 +78,48 @@ class Handler {
             return;
         let section_name = ctx.path.startsWith(tradit_constants_1.SECTION_URI) ? ctx.path.slice(2) : '';
         let id = this.interpreter.getSectionIndex(section_name);
-        let entry_generator = null;
-        entry_generator =
-            this.interpreter.template.params[id].no_list || section_name
+        let allow_private_section = false;
+        let readable_list = null;
+        readable_list =
+            (this.interpreter.template.params[id].no_list || section_name !== '')
                 ? null
                 : await tradit_globals_1.HFS.file_list({ path: ctx.path, omit: 'c', sse: true }, ctx);
-        if (entry_generator instanceof Error) {
-            switch (ctx.status = entry_generator.status) {
-                case 404:
-                    section_name = 'not found';
-                    break;
-                case 401:
+        do { // for good code by early break
+            if (readable_list === null)
+                break;
+            await (0, events_1.once)(readable_list, 'readable');
+            let possible_error = readable_list.read();
+            if (possible_error === null)
+                break; // TODO: is this possible?
+            if (possible_error.error === undefined) {
+                readable_list.unshift(possible_error); // not an error
+                break;
+            }
+            switch (ctx.status = possible_error.error) {
+                case tradit_globals_1.API.const.UNAUTHORIZED:
                     section_name = 'unauth';
                     break;
-                case 403:
+                case tradit_globals_1.API.const.FORBIDDEN:
                     section_name = 'forbidden';
                     break;
                 case 400:
-                    // section_name = 'bad request';
-                    section_name = 'not found';
-                    break;
-                case 418:
+                    // bad request
                     return;
+                case 418:
+                    // potential attack, or tea pot
+                    return true;
+                default:
+                    section_name = 'not found';
             }
-            entry_generator = null;
-        }
-        if (!this.interpreter.hasSection(section_name)) {
+            readable_list = null;
+            allow_private_section = true;
+        } while (false);
+        if (!this.interpreter.hasSection(section_name, allow_private_section)) {
             ctx.status = 404;
             section_name = 'not found';
         }
-        if (!this.interpreter.hasSection(section_name))
-            return void (ctx.body = 'not found');
+        if (!this.interpreter.hasSection(section_name, allow_private_section))
+            return;
         let generator;
         const step = 64;
         let readable = new ReadableForMacros({
@@ -121,9 +133,9 @@ class Handler {
             },
             ctx: ctx
         });
-        generator = this.interpreter.getSectionGenerator(section_name, readable, entry_generator);
+        generator = this.interpreter.getSectionGenerator(section_name, readable, readable_list, allow_private_section);
         if (!generator)
-            return void (ctx.body = 'not found');
+            return;
         ctx.status = 200;
         ctx.type = mimetype(ctx.path);
         ctx.body = readable;

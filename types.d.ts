@@ -40,14 +40,14 @@ type AssemblizedTemplate = {
  * HFS internal API
  */
 interface HFS<TypeofFS> {
-    file_list<T extends FileEntryGenerator | FileEntryList>(
+    file_list<T>(
         args: {
             path: string;
             omit: 'c';
             sse: boolean;
         },
         ctx: KoaContext
-    ): Promise<T | APIError>;
+    ): Promise<T>;
     fs: TypeofFS;
     auth?: {
         refresh_session({}, ctx: KoaContext): Promise<{
@@ -125,8 +125,15 @@ interface FileEntry {
     s?: number | undefined;
 }
 
+interface SendListEntry<T> {
+    add?: T;
+    remove?: T;
+    update?: T;
+    error?: number; // string | number;
+}
+
 type FileEntryGenerator = AsyncGenerator<{ entry: FileEntry }>;
-type FileEntryList = { list: FileEntry[] };
+type FileEntryList = { list: FileEntry[] } | APIError;
 
 interface APIError extends Error {
     status: number;

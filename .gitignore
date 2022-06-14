@@ -3,6 +3,7 @@
 *.js.map
 !bare.tpl
 #dist
+debug
 
 .directory
 thumbs.db

@@ -267,14 +267,16 @@ new Macro('list', c => {
         t_folder = await d.i.getSectionAsText('folder', d, true);
         t_link = await d.i.getSectionAsText('link', d, true);
         let value, result = '';
-        for await (let { entry } of d.l) {
+        for await (let { add } of d.l) {
             if (d.c.aborted)
                 break;
-            value = (entry.s === undefined ? t_folder : t_file)
-                .replace('%item-url%', d.c.path + entry.n)
-                .replace('%item-name%', entry.n)
-                .replace('%item-modified%', entry.m?.toLocaleString() ?? '')
-                .replace('%item-size%', smartSize(entry.s ?? 0));
+            if (add === undefined)
+                continue;
+            value = (add.s === undefined ? t_folder : t_file)
+                .replace('%item-url%', d.c.path + add.n)
+                .replace('%item-name%', add.n)
+                .replace('%item-modified%', add.m?.toLocaleString() ?? '')
+                .replace('%item-size%', smartSize(add.s ?? 0));
             pass ? await d.p.put(value) : result += value;
         }
         if (!pass)
