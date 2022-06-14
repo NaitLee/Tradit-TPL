@@ -48,7 +48,7 @@ export class Handler {
                 API.setConfig(CFG_KEY_PATH, path);
                 return; // let subscriber work
             } else {
-                API.log('Please select a template in plugin configuration');
+                API.log('Please manually select a template in plugin configuration');
                 return;
             }
         }

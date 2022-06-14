@@ -29,7 +29,11 @@ But currently *none* of existing templates will work perfectly.
 
 ## FaQ
 
-**Why "Trait-TPL"?**  
+<details>
+
+<summary>Expand FaQ</summary>
+
+**Why "Tradit-TPL"?**  
 I casually took it from word "traditional". But that word is not the case -- we have new way.  
 And pronounce that "tra" as in "trap".
 
@@ -38,15 +42,23 @@ Since it's non-production, it yet can't be determined.
 But it's certainly true that so-called "injection" **won't** work!  
 *Leave away from those tech imps.* Test your case with good tools like [OWASP ZAP](https://www.zaproxy.org/), *not a mouth*.
 
+</details>
+
 ## Dev
 
 - Prepare: `cd` to repo, `npm install`
 - Transpile: `npx tsc`
 
+<details>
+
+<summary>Tips for Linux/*nix</summary>
+
 Symlinking `dist` to plugin folder as `Tradit-TPL` helps.
 
 Under X11 (yes, neither Windows/Wine nor Wayland), HFS can't reload correctly with `npx tsc --watch`, after 2 times.  
 Assign a keybinding to your DE (like KDE Plasma) to run `touch /<DEV_PATH_HERE>/Tradit-TPL/dist/plugin.js`. My choice is `Ctrl+Alt+Shift+S`.
+
+</details>
 
 Far more things are going to be changed, and many macros are not implemented yet.
 
