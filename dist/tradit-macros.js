@@ -130,7 +130,7 @@ new Macro('breadcrumbs', c => {
         for (let i = 0; i < parts.length; i++) {
             bread = template
                 .replace('%bread-url%', parts.slice(0, i + 1).join('/') + '/')
-                .replace('%bread-name%', parts[i] || '/');
+                .replace('%bread-name%', parts[i] || '');
             pass ? await d.p.put(bread) : result += bread;
         }
         if (!pass)
