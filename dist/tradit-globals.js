@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.init = exports.Debug = exports.API = exports.Plugin = exports.HFS = void 0;
+exports.globalInit = exports.Debug = exports.API = exports.Plugin = exports.HFS = void 0;
 const tradit_constants_1 = require("./tradit-constants");
-function init(plugin, api) {
+function globalInit(plugin, api) {
     exports.Plugin = plugin;
     exports.API = api;
     exports.Debug = api.getConfig(tradit_constants_1.CFG_KEY_DEBUG);
@@ -11,5 +11,5 @@ function init(plugin, api) {
         fs: api.require('fs')
     };
 }
-exports.init = init;
+exports.globalInit = globalInit;
 //# sourceMappingURL=tradit-globals.js.map

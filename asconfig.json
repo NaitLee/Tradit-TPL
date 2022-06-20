@@ -1,14 +1,14 @@
 {
   "targets": {
     "debug": {
-      "outFile": "debug/tradit-wasm.wasm",
-      "textFile": "debug/tradit-wasm.wat",
+      "outFile": "src/tradit-wasm.wasm",
+      "textFile": "src/tradit-wasm.wat",
       "sourceMap": true,
       "debug": true
     },
     "release": {
-      "outFile": "dist/tradit-wasm.wasm",
-      "textFile": "dist/tradit-wasm.wat",
+      "outFile": "src/tradit-wasm.wasm",
+      "textFile": "src/tradit-wasm.wat",
       "sourceMap": true,
       "optimizeLevel": 3,
       "shrinkLevel": 0,
@@ -17,6 +17,7 @@
     }
   },
   "options": {
-    "bindings": "esm"
+    "bindings": "raw",
+    "exportRuntime": true
   }
 }

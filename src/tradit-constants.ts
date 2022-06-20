@@ -1,6 +1,7 @@
 
 export const PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
 export const PLUGIN_PATH = __dirname + PATH_DELIM;
+export const WASM_PATH = PLUGIN_PATH + 'tradit-wasm.wasm';
 export const CFG_KEY_PATH = 'path';
 export const CFG_KEY_DEBUG = 'debug';
 export const SECTION_URI = '/~';
@@ -17,6 +18,10 @@ export const MacroMarker = {
     Sym: '%'
 };
 
+/**
+ * We serve only pages, not files.
+ * Don't put too much here.
+ */
 export const Mimetype: {
     [suffix: string]: string
 } = {

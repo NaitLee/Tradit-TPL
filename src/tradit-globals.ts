@@ -7,7 +7,7 @@ export var Plugin: HFSPlugin;
 export var API: PluginAPI;
 export var Debug: number;
 
-export function init(plugin: HFSPlugin, api: PluginAPI) {
+export function globalInit(plugin: HFSPlugin, api: PluginAPI) {
     Plugin = plugin;
     API = api;
     Debug = api.getConfig(CFG_KEY_DEBUG);

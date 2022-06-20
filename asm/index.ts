@@ -1,4 +1,16 @@
 
-export function add(a: i32, b: i32): i32 {
-    return a + b;
+import { Macros } from "./macros";
+
+export function helloWorld(): string {
+    return 'Hello, world!';
+}
+
+export function testArray(array: i32[]): i32 {
+    return array.pop();
+}
+
+export function tryMacro(name: string): boolean {
+    if (!Macros.has(name)) return false;
+    Macros.get(name)();
+    return true;
 }

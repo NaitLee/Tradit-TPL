@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.CFG_KEY_DEBUG = exports.CFG_KEY_PATH = exports.PLUGIN_PATH = exports.PATH_DELIM = void 0;
+exports.StackType = exports.ItemRole = exports.DebugFlags = exports.Mimetype = exports.MacroMarker = exports.NULL_INT = exports.NULL_STRING = exports.NULL_NUMBER = exports.SECTION_URI = exports.CFG_KEY_DEBUG = exports.CFG_KEY_PATH = exports.WASM_PATH = exports.PLUGIN_PATH = exports.PATH_DELIM = void 0;
 exports.PATH_DELIM = process.platform === 'win32' ? '\\' : '/';
 exports.PLUGIN_PATH = __dirname + exports.PATH_DELIM;
+exports.WASM_PATH = exports.PLUGIN_PATH + 'tradit-wasm.wasm';
 exports.CFG_KEY_PATH = 'path';
 exports.CFG_KEY_DEBUG = 'debug';
 exports.SECTION_URI = '/~';
@@ -17,6 +18,10 @@ exports.MacroMarker = {
     Dequote: ':}',
     Sym: '%'
 };
+/**
+ * We serve only pages, not files.
+ * Don't put too much here.
+ */
 exports.Mimetype = {
     'html': 'text/html',
     'json': 'text/json',

@@ -23,18 +23,25 @@ exports.config = {
         defaultValue: 0
     }
 };
-exports.init = function (api) {
-    (0, tradit_globals_1.init)(exports, api);
-    const handler = new tradit_handler_1.Handler();
-    return {
-        middleware: async function (ctx) {
-            if (ctx.path.startsWith(api.const.SPECIAL_URI))
-                return;
-            return await handler.handle(ctx);
-        },
-        unload: async function () {
-            handler.unload();
-        }
-    };
+exports.init = async function (api) {
+    try {
+        (0, tradit_globals_1.globalInit)(exports, api);
+        // let module = await WebAssembly.compile(readFileSync(WASM_PATH));
+        const handler = new tradit_handler_1.Handler();
+        return {
+            middleware: async function (ctx) {
+                if (ctx.path.startsWith(api.const.SPECIAL_URI))
+                    return;
+                return await handler.handle(ctx);
+            },
+            unload: async function () {
+                handler.unload();
+            }
+        };
+    }
+    catch (error) {
+        api.log(`Load failed - ${error}`);
+        return {};
+    }
 };
 //# sourceMappingURL=plugin.js.map

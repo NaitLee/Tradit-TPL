@@ -1,9 +1,11 @@
 
 ///<reference path="./types.d.ts" />
 
-import { CFG_KEY_DEBUG, CFG_KEY_PATH, PLUGIN_PATH } from './tradit-constants';
+import { CFG_KEY_DEBUG, CFG_KEY_PATH, PLUGIN_PATH, WASM_PATH } from './tradit-constants';
 import { Handler } from './tradit-handler';
-import { init } from './tradit-globals';
+import { globalInit } from './tradit-globals';
+import { instantiate } from './tradit-wasm';
+import { readFileSync } from 'fs';
 
 declare var exports: HFSPlugin;
 
@@ -28,16 +30,22 @@ exports.config = {
     }
 };
 
-exports.init = function(api) {
-    init(exports, api);
-    const handler = new Handler();
-    return {
-        middleware: async function(ctx) {
-            if (ctx.path.startsWith(api.const.SPECIAL_URI)) return;
-            return await handler.handle(ctx);
-        },
-        unload: async function() {
-            handler.unload();
-        }
-    };
+exports.init = async function(api) {
+    try {
+        globalInit(exports, api);
+        // let module = await WebAssembly.compile(readFileSync(WASM_PATH));
+        const handler = new Handler();
+        return {
+            middleware: async function(ctx) {
+                if (ctx.path.startsWith(api.const.SPECIAL_URI)) return;
+                return await handler.handle(ctx);
+            },
+            unload: async function() {
+                handler.unload();
+            }
+        };
+    } catch(error) {
+        api.log(`Load failed - ${error}`);
+        return {};
+    }
 }

@@ -66,7 +66,7 @@ interface HFSPlugin {
     apiRequired: number;
     frontend_css?: string | string[];
     frontend_js?: string | string[];
-    init?(api: PluginAPI): Partial<HFSPlugin>;
+    init?(api: PluginAPI): Partial<HFSPlugin> | Promise<Partial<HFSPlugin>>;
     middleware?(ctx: KoaContext): Promise<void | true | Function>;
     unload?(): void;
     config?: { [key: string]: FieldDescriptor };
