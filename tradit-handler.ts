@@ -8,9 +8,11 @@ import { Interpreter } from './tradit-interpreter';
 import { serialize } from './tradit-serializer';
 import { makePathConsistent } from './tradit-misc';
 
+// Note: Incomplete
 export interface SendListReadable extends Readable {
     [Symbol.asyncIterator](): AsyncIterableIterator<SendListEntry<FileEntry>>;
     read(size?: number): SendListEntry<FileEntry>;
+    getLastError(): number | undefined;
 }
 
 export class ReadableForMacros extends Readable {
@@ -20,10 +22,11 @@ export class ReadableForMacros extends Readable {
         this.ctx = options.ctx;
     }
     async put(item: any) {
+        this.push(item);
         // Note: this is useless. Will find a better solution
-        if (!this.push(item)) {
-            await once(this, 'readable');
-        }
+        // if (!this.push(item)) {
+        //     await once(this, 'readable');
+        // }
     }
 }
 
@@ -97,35 +100,27 @@ export class Handler {
         do { // for good code by early break
             if (readable_list === null) break;
             await once(readable_list, 'readable');
-            let possible_error = readable_list.read();
-            if (possible_error === null) break; // TODO: is this possible?
-            if (possible_error.error === undefined) {
-                readable_list.unshift(possible_error); // not an error
-                break;
-            }
-            switch (ctx.status = possible_error.error) {
+            let possible_error = readable_list.getLastError();
+            if (possible_error === undefined) break;
+            switch (ctx.status = possible_error) {
+                case 418:
+                    // potential attack, or tea pot
+                    return true;
+                case 404:
+                    section_name = 'not found';
+                    break;
                 case API.const.UNAUTHORIZED:
                     section_name = 'unauth';
                     break;
                 case API.const.FORBIDDEN:
                     section_name = 'forbidden';
                     break;
-                case 400:
-                    // bad request
-                    return;
-                case 418:
-                    // potential attack, or tea pot
-                    return true;
                 default:
-                    section_name = 'not found';
+                    return;
             }
             readable_list = null;
             allow_private_section = true;
         } while (false);
-        if (!this.interpreter.hasSection(section_name, allow_private_section)) {
-            ctx.status = 404;
-            section_name = 'not found';
-        }
         if (!this.interpreter.hasSection(section_name, allow_private_section)) return;
         let generator: AsyncGenerator<boolean>;
         const step: number = 64;

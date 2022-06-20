@@ -3,6 +3,8 @@
 *.js.map
 !bare.tpl
 #dist
+dist/*.wasm.map
+dist/*.wat
 debug
 
 .directory

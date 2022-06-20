@@ -1,4 +1,7 @@
 
+[api level]
+2
+
 []
 <!DOCTYPE html>
 <!-- Template License: CC0 -->
@@ -11,7 +14,7 @@
 </head>
 <body>
     <main>
-        <p>{.replace|<a href="/">/</a>|<a href="/">Home</a>|{.breadcrumbs|<a href="%bread-url%">%bread-name%</a> &gt; .}.}</p>
+        <p>{.replace|<a href="/"></a>|<a href="/">Home</a>|{.breadcrumbs|<a href="%bread-url%">%bread-name%</a> &gt; .}.}</p>
         %files%
     </main>
     <div class="overlay">
@@ -210,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
         });
         player.addEventListener('auxclick', (event) => {
+            if (event.button !== 1) return; // isn't middle click
             shuffle = !shuffle;
             play_next();
             event.preventDefault();

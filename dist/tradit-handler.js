@@ -15,10 +15,11 @@ class ReadableForMacros extends stream_1.Readable {
         this.ctx = options.ctx;
     }
     async put(item) {
+        this.push(item);
         // Note: this is useless. Will find a better solution
-        if (!this.push(item)) {
-            await (0, events_1.once)(this, 'readable');
-        }
+        // if (!this.push(item)) {
+        //     await once(this, 'readable');
+        // }
     }
 }
 exports.ReadableForMacros = ReadableForMacros;
@@ -88,36 +89,28 @@ class Handler {
             if (readable_list === null)
                 break;
             await (0, events_1.once)(readable_list, 'readable');
-            let possible_error = readable_list.read();
-            if (possible_error === null)
-                break; // TODO: is this possible?
-            if (possible_error.error === undefined) {
-                readable_list.unshift(possible_error); // not an error
+            let possible_error = readable_list.getLastError();
+            if (possible_error === undefined)
                 break;
-            }
-            switch (ctx.status = possible_error.error) {
+            switch (ctx.status = possible_error) {
+                case 418:
+                    // potential attack, or tea pot
+                    return true;
+                case 404:
+                    section_name = 'not found';
+                    break;
                 case tradit_globals_1.API.const.UNAUTHORIZED:
                     section_name = 'unauth';
                     break;
                 case tradit_globals_1.API.const.FORBIDDEN:
                     section_name = 'forbidden';
                     break;
-                case 400:
-                    // bad request
-                    return;
-                case 418:
-                    // potential attack, or tea pot
-                    return true;
                 default:
-                    section_name = 'not found';
+                    return;
             }
             readable_list = null;
             allow_private_section = true;
         } while (false);
-        if (!this.interpreter.hasSection(section_name, allow_private_section)) {
-            ctx.status = 404;
-            section_name = 'not found';
-        }
         if (!this.interpreter.hasSection(section_name, allow_private_section))
             return;
         let generator;
