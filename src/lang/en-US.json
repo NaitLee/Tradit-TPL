@@ -1,0 +1,21 @@
+{
+    "Language": "English (US)",
+    "initialized-in-0-seconds": "Initialized in {0} seconds",
+    "using-template-0": "Using template '{0}'",
+    "ready": "Ready",
+    "tradit-tpl-error-0": "Tradit-TPL Error: {0}",
+    "please-manually-select-a-template-in-plugin-configuration": "Please manually select a template in plugin configuration",
+    "note-0": "Note - {0}",
+    "warning-0": "Warning - {0}",
+    "error-0": "Error - {0}",
+    "use-an-hfs-2-template-in-hfs-3": "Use an HFS 2 'template' in HFS 3",
+    "template": "Template",
+    "path-to-template-file": "Path to template file",
+    "language": "Language",
+    "language-code-eg-en-us": "Language code, e.g. en-US",
+    "debug-flag": "Debug Flag",
+    "for-developers-only": "For developers only",
+    "cant-load-template-0-1": "Can't load template '{0}' - {1}",
+    "dynamic-macro-in-use-this-may-cause-performance-issue": "Dynamic macro in use. This may cause performance issue.",
+    "macro-0-is-not-implemented": "Macro '{0}' is not implemented"
+}

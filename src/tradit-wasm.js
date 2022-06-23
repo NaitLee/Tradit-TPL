@@ -17,21 +17,59 @@ export async function instantiate(module, imports = {}) {
   const { exports } = await WebAssembly.instantiate(module, adaptedImports);
   const memory = exports.memory || imports.env.memory;
   const adaptedExports = Object.setPrototypeOf({
-    helloWorld() {
-      // asm/index/helloWorld() => ~lib/string/String
-      return __liftString(exports.helloWorld() >>> 0);
-    },
-    testArray(array) {
-      // asm/index/testArray(~lib/array/Array<i32>) => i32
-      array = __lowerArray((pointer, value) => { new Int32Array(memory.buffer)[pointer >>> 2] = value; }, 5, 2, array) || __notnull();
-      return exports.testArray(array);
-    },
-    tryMacro(name) {
-      // asm/index/tryMacro(~lib/string/String) => bool
+    addSection(name, id, index) {
+      // asm/index/addSection(~lib/string/String, i32, i32) => void
       name = __lowerString(name) || __notnull();
-      return exports.tryMacro(name) != 0;
+      exports.addSection(name, id, index);
+    },
+    addParams(parameters) {
+      // asm/index/addParams(asm/index/SectionParams) => void
+      parameters = __lowerRecord5(parameters) || __notnull();
+      exports.addParams(parameters);
+    },
+    addStrings(string_array) {
+      // asm/index/addStrings(~lib/array/Array<~lib/string/String>) => void
+      string_array = __lowerArray((pointer, value) => { new Uint32Array(memory.buffer)[pointer >>> 2] = __lowerString(value) || __notnull(); }, 7, 2, string_array) || __notnull();
+      exports.addStrings(string_array);
+    },
+    addNumbers(number_array) {
+      // asm/index/addNumbers(~lib/array/Array<f32>) => void
+      number_array = __lowerArray((pointer, value) => { new Float32Array(memory.buffer)[pointer >>> 2] = value; }, 8, 2, number_array) || __notnull();
+      exports.addNumbers(number_array);
+    },
+    addString(string) {
+      // asm/index/addString(~lib/string/String) => void
+      string = __lowerString(string) || __notnull();
+      exports.addString(string);
+    },
+    addGroup(group) {
+      // asm/index/addGroup(asm/index/Group) => void
+      group = __lowerRecord9(group) || __notnull();
+      exports.addGroup(group);
     },
   }, exports);
+  function __lowerRecord5(value) {
+    // asm/index/SectionParams
+    // Hint: Opt-out from lowering as a record by providing an empty constructor
+    if (value == null) return 0;
+    const pointer = exports.__pin(exports.__new(4, 5));
+    new Uint8Array(memory.buffer)[pointer + 0 >>> 0] = value.is_public ? 1 : 0;
+    new Uint8Array(memory.buffer)[pointer + 1 >>> 0] = value.no_log ? 1 : 0;
+    new Uint8Array(memory.buffer)[pointer + 2 >>> 0] = value.no_list ? 1 : 0;
+    new Uint8Array(memory.buffer)[pointer + 3 >>> 0] = value.cache ? 1 : 0;
+    exports.__unpin(pointer);
+    return pointer;
+  }
+  function __lowerRecord9(value) {
+    // asm/index/Group
+    // Hint: Opt-out from lowering as a record by providing an empty constructor
+    if (value == null) return 0;
+    const pointer = exports.__pin(exports.__new(8, 9));
+    new Uint32Array(memory.buffer)[pointer + 0 >>> 2] = __lowerArray((pointer, value) => { new Int32Array(memory.buffer)[pointer >>> 2] = value; }, 10, 2, value.order) || __notnull();
+    new Uint32Array(memory.buffer)[pointer + 4 >>> 2] = __lowerArray((pointer, value) => { new Int32Array(memory.buffer)[pointer >>> 2] = value; }, 10, 2, value.map) || __notnull();
+    exports.__unpin(pointer);
+    return pointer;
+  }
   function __liftString(pointer) {
     if (!pointer) return null;
     const

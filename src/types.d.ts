@@ -4,9 +4,9 @@
  * but a number, bigger than 0, indicates how many items to pop & execute;
  * and 0 means concatenate next stack item, to a single item
  */
-type MacroSegment = string | number | MacroSegment[];
+type MacroSegmentStage1 = string | number | MacroSegmentStage1[];
 
-type SerializedTemplate = { [section: string]: Section; };
+type TemplateStage1 = { [section: string]: SectionStage1; };
 
 /**
  * Assemblized macros.
@@ -14,27 +14,40 @@ type SerializedTemplate = { [section: string]: Section; };
  * Items, including plain strings, plain numbers, commands, other `MacroSegmentSerialized`,
  * are stored in dedicated arrays.
  */
-type MacroSegmentAssemblized = number[];
+type MacroSegmentStage2 = number[];
 
-type Section = {
+type SectionStage1 = {
     alias: string | null;
     params: string[];
-    segments: MacroSegment[] | null;
+    segments: MacroSegmentStage1[] | null;
 };
 
-type AssemblizedTemplate = {
-    template: number[];
-    sections: { [name: string]: number };
-    params: {
-        public?: boolean;
-        no_log?: boolean;
-        no_list?: boolean;
-        cache?: boolean;
-    }[];
+type SectionParams = {
+    is_public: boolean;
+    no_log: boolean;
+    no_list: boolean;
+    cache: boolean;
+};
+
+type TemplateStage2 = {
+    sectionId2GroupIndex: number[];
+    sectionName2Id: { [name: string]: number };
+    params: SectionParams[];
     strings: string[];
-    groups: MacroSegmentAssemblized[];
-    group_maps: ItemRole[][];
-}
+    groups: MacroSegmentStage2[];
+    groupMaps: ItemRole[][];
+};
+
+type UnifiedTemplate = {
+    sectionId2GroupIndex: number[];
+    sectionName2Id: { [name: string]: number };
+    params: SectionParams[];
+    strings: string[];
+    groups: {
+        group: number[];
+        map: number[];
+    }[];
+};
 
 /**
  * HFS internal API
@@ -115,6 +128,7 @@ interface KoaContext {
     set(header: string, value: string): void;
     type: string;
     aborted: boolean;
+    acceptsLanguages(langs: string[]): string;
 }
 
 interface FileEntry {

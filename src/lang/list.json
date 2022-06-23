@@ -1,0 +1,9 @@
+{
+    "supported": ["en-US", "zh-CN"],
+    "aliases": {
+        "en": "en-US",
+        "en-GB": "en-US",
+        "zh": "zh-CN",
+        "zh-TW": "zh-CN"
+    }
+}

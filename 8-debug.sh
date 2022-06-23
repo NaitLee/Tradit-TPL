@@ -1,3 +1,4 @@
 #!/bin/sh
-./1-asc.sh
-./0-tsc.sh
+cp -r src/lang debug/
+./2-asc.sh
+./1-tsc.sh

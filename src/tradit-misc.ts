@@ -5,11 +5,19 @@ export function makePathConsistent(path: string) {
     return path.replaceAll(process.platform === 'win32' ? '/' : '\\', PATH_DELIM);
 }
 
-export function groupToString(rootid: number, template: AssemblizedTemplate) {
+export function objectToMap<T>(object: { [key: string]: T }): Map<string, T> {
+    let map = new Map<string, T>();
+    for (let key in object) {
+        map.set(key, object[key]);
+    }
+    return map;
+}
+
+export function groupToString(rootid: number, template: TemplateStage2) {
     // NOT USEFUL AND BROKEN
     function recurse(id: number) {
         let group = template.groups[id];
-        let map = template.group_maps[id];
+        let map = template.groupMaps[id];
         let result: string[] = [];
         let item: number;
         for (let i = 0; i < group.length; i++) {

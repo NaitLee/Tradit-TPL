@@ -1,11 +1,10 @@
 
 import { once } from 'events';
 import { Readable, ReadableOptions } from 'stream';
-import { API, Debug, HFS } from './tradit-globals';
-import { assemblize } from './tradit-assemblizer';
-import { CFG_KEY_PATH, DebugFlags, Mimetype, PATH_DELIM, PLUGIN_PATH, SECTION_URI } from './tradit-constants';
+import { API, HFS, Locales, Log, Unsubscribers } from './tradit-globals';
+import { CFG_KEY_LANG, CFG_KEY_PATH, DEF_LANG, Mimetype, PATH_DELIM, PLUGIN_PATH, SECTION_URI } from './tradit-constants';
 import { Interpreter } from './tradit-interpreter';
-import { serialize } from './tradit-serializer';
+import { unifyTemplate } from './tradit-unifier';
 import { makePathConsistent } from './tradit-misc';
 
 // Note: Incomplete
@@ -37,15 +36,15 @@ function mimetype(path: string) {
 
 export class Handler {
     interpreter: Interpreter | null;
-    unsubscribers: Unsubscriber[];
+    private languageBeingSet: boolean;
     constructor() {
         this.interpreter = null;
-        this.unsubscribers = [];
+        this.languageBeingSet = API.getConfig(CFG_KEY_LANG) !== '';
         let path: string = API.getConfig(CFG_KEY_PATH);
         path = makePathConsistent(path); // i have edge case: dev on *nix but test with wine
         if (!path.includes(PATH_DELIM)) path = PLUGIN_PATH + path;
         API.setConfig(CFG_KEY_PATH, path);
-        this.unsubscribers.push(
+        Unsubscribers.push(
             API.subscribeConfig(CFG_KEY_PATH, this.loadTemplate.bind(this))
         );
     }
@@ -57,31 +56,33 @@ export class Handler {
                 API.setConfig(CFG_KEY_PATH, path);
                 return; // let subscriber work
             } else {
-                API.log('Please manually select a template in plugin configuration');
+                Log.note('please-manually-select-a-template-in-plugin-configuration');
                 return;
             }
         }
-        let debug_dump = Debug & DebugFlags.DumpTpl;
         HFS.fs.readFile(path, {
             encoding: 'utf-8'
-        }, (err, data) => {
-            if (err) {
-                API.log(`can't load template: ${err}`);
+        }, (error, data) => {
+            if (error) {
+                Log.warn('cant-load-template-0-1', [path, error]);
                 return;
             }
-            let serialized = serialize(data);
-            let template = assemblize(serialized);
-            if (debug_dump) {
-                HFS.fs.writeFileSync(path + '.s.json', JSON.stringify(serialized, void 0, 4), 'utf-8');
-                HFS.fs.writeFileSync(path + '.a.json', JSON.stringify(template, void 0, 4), 'utf-8');
-            }
+            let template = unifyTemplate(data);
             this.interpreter = new Interpreter(template, API);
-            API.log(`using template '${path}'`);
-            API.log(`Ready`);
+            Log.log('using-template-0', [path]);
+            Log.log('ready');
         });
     }
     async handle(ctx: KoaContext) {
         if (!this.interpreter) return;
+        if (ctx.path.startsWith(API.const.SPECIAL_URI)) {
+            if (!this.languageBeingSet) {
+                let best = ctx.acceptsLanguages(Locales.supported) || DEF_LANG;
+                API.setConfig(CFG_KEY_LANG, best);
+                this.languageBeingSet = true;
+            }
+            return;
+        }
         if (
             !ctx.path.endsWith('/') && // file serving is by HFS
             !ctx.path.startsWith(SECTION_URI) // HFS special uris are filtered in plugin.ts
@@ -146,9 +147,5 @@ export class Handler {
         ctx.type = mimetype(ctx.path);
         ctx.body = readable;
         return true;
-    }
-    unload() {
-        this.unsubscribers.forEach(f => f());
-        this.unsubscribers.length = 0;
     }
 }

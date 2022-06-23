@@ -1,0 +1,21 @@
+{
+    "Language": "简体中文",
+    "initialized-in-0-seconds": "在 {0} 秒内初始化完毕",
+    "using-template-0": "将使用模板 '{0}'",
+    "ready": "就绪",
+    "tradit-tpl-error-0": "Tradit-TPL 错误：{0}",
+    "please-manually-select-a-template-in-plugin-configuration": "请在插件配置中手动选择模板",
+    "note-0": "提示 - {0}",
+    "warning-0": "警告 - {0}",
+    "error-0": "错误 - {0}",
+    "use-an-hfs-2-template-in-hfs-3": "在 HFS 3 中使用 HFS 2 “模板”",
+    "template": "模板",
+    "path-to-template-file": "模板文件的路径",
+    "language": "语言",
+    "language-code-eg-en-us": "语言代码，如 en-US",
+    "debug-flag": "调试标记",
+    "for-developers-only": "仅用于开发",
+    "cant-load-template-0-1": "无法加载模板 '{0}' - {1}",
+    "dynamic-macro-in-use-this-may-cause-performance-issue": "使用了动态宏。这可能导致性能问题。",
+    "macro-0-is-not-implemented": "宏 '{0}' 尚未实现"
+}

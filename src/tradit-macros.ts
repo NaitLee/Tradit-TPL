@@ -275,8 +275,7 @@ function smartSize(size: number): string {
 }
 
 new Macro('list', c => {
-    const pass = true; // c.r;
-    if (!pass) console.warn('warning: file listing in non-passthrough context');
+    const pass = true;
     return async d => {
         if (d.l === null) return;
         let t_file: string | null = null;

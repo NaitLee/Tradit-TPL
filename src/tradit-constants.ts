@@ -4,6 +4,8 @@ export const PLUGIN_PATH = __dirname + PATH_DELIM;
 export const WASM_PATH = PLUGIN_PATH + 'tradit-wasm.wasm';
 export const CFG_KEY_PATH = 'path';
 export const CFG_KEY_DEBUG = 'debug';
+export const CFG_KEY_LANG = 'language';
+export const DEF_LANG = 'en-US';
 export const SECTION_URI = '/~';
 export const NULL_NUMBER = NaN;
 export const NULL_STRING = '\x00';
@@ -34,20 +36,28 @@ export const Mimetype: {
 };
 
 export enum DebugFlags {
-    Verbose = 0b1,
-    DumpTpl = 0b10
+    Verbose = 1 << 0,
+    DumpTpl = 1 << 1,
 }
 
 export enum ItemRole {
-    Plain = 0b1,
-    Group = 0b10,
-    PopCount = 0b100,
-    Pop = 0b1000,
-    Static = 0b10000
+    Plain = 1 << 0,
+    Group = 1 << 1,
+    PopCount = 1 << 2,
+    Pop = 1 << 3,
+    Static = 1 << 4,
+}
+
+export enum GroupMap {
+    String,
+    Number,
+    Group,
+    Exec,
+    Pop,
 }
 
 export enum StackType {
     Number = 0,
     String = 1,
-    Group = 2
+    Group = 2,
 }

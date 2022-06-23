@@ -3,6 +3,7 @@ import { Macro, Macros } from "./tradit-macros";
 import { ItemRole as ItemRole, NULL_INT, NULL_NUMBER, NULL_STRING, StackType } from "./tradit-constants";
 import { ReadableForMacros, SendListReadable } from "./tradit-handler";
 import { groupToString } from "./tradit-misc";
+import { Log } from "./tradit-globals";
 // import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 
 type Variables = {
@@ -40,7 +41,7 @@ export interface MacroProcessContext {
     /** interpreter instance */
     i: Interpreter;
     /** AssemblizedTemplate */
-    t: AssemblizedTemplate;
+    t: TemplateStage2;
 }
 
 export interface MacroRoutineContext {
@@ -112,7 +113,6 @@ export class MacroParameters {
                 ? ((pop ? this.numbers.pop() : this.numbers.shift()) as number)
                 : parseFloat((pop ? this.strings.pop() : this.strings.shift()) as string);
             if (isNaN(value)) {
-                if (1) console.warn(`warning: encountered NaN in nextNumber`);
                 value = 0;
             }
         }
@@ -288,7 +288,7 @@ export class Interpreter {
     globalVariables: { n: { [key: string]: number }, s: { [key: string]: string } };
     routines: MacroRoutine[][];
     anchors: number[][];
-    constructor(public template: AssemblizedTemplate, public api: PluginAPI) {
+    constructor(public template: TemplateStage2, public api: PluginAPI) {
         this.routines = [];
         this.anchors = [];
         this.globalVariables = { n: {}, s: {} };
@@ -297,7 +297,7 @@ export class Interpreter {
         let time_start = new Date().getTime();
         const prepare_index = (group_index: number, allow_root = false) => {
             let group = template.groups[group_index].concat();
-            let group_map = template.group_maps[group_index].concat();
+            let group_map = template.groupMaps[group_index].concat();
             // two things, containing final "runtime" routine data
             let routine_list: MacroRoutine[],
                 anchors: number[];
@@ -322,7 +322,7 @@ export class Interpreter {
             // (re-)init
             routine_list = [], anchors = group;
             group = template.groups[group_index].concat();
-            group_map = template.group_maps[group_index].concat();
+            group_map = template.groupMaps[group_index].concat();
             let ctx = this.newPreparationContext();
             while ((index = group_map.indexOf(ItemRole.PopCount, command_at + 1)) !== -1) {
                 count = group[index];
@@ -338,17 +338,14 @@ export class Interpreter {
                     next_root_anchor_at++;
                 }
                 chunk = group.splice(command_at, count + 1, anchor++);
-                // api.log(JSON.stringify(chunk.map(n => template.strings[n])));
                 chunk.pop();
                 chunk_map = group_map.splice(command_at, count + 1, ItemRole.Pop);
-                // api.log(JSON.stringify(chunk_map));
                 chunk_map.pop();
-                // api.log('');
                 if (chunk_map[0] & ItemRole.Pop) {
                     command = '__dyn';
                     macro = Macros[command];
                     dynamic = true;
-                    api.log(`warning: dynamic macro in use, this may cause performance issues`);
+                    Log.warn('dynamic-macro-in-use-this-may-cause-performance-issue');
                 } else {
                     command = concat ? (ctx.r ? '__echo' : '__cat') : template.strings[chunk[0]];
                     if (!concat) {
@@ -357,7 +354,7 @@ export class Interpreter {
                         chunk_map.shift();
                     }
                     if (!(macro = Macros[command])) {
-                        api.log(`warning: command '${command}' is not implemented`);
+                        Log.warn('macro-0-is-not-implemented', [command]);
                         continue;
                     }
                 }
@@ -395,7 +392,6 @@ export class Interpreter {
                 }
                 // if (dynamic) ctx = this.newPreparationContext();
                 if (!ctx.p.isEmpty()) {
-                    api.log(`warning: leftovers of parameters after ${command} #${anchor}`);
                     ctx.p.drain();
                 }
                 // handled_items += count;
@@ -413,12 +409,12 @@ export class Interpreter {
             this.routines[group_index] = routine_list;
             this.anchors[group_index] = anchors;
         }
-        for (let name in template.sections) {
-            let i = template.template[template.sections[name]];
+        for (let name in template.sectionName2Id) {
+            let i = template.sectionId2GroupIndex[template.sectionName2Id[name]];
             prepare_index(i, SectionPassing[name] ?? true);
         }
         let time_elapsed = new Date().getTime() - time_start;
-        if (time_elapsed >= 1000) api.log(`[interpreter] initialized in ${Math.floor(time_elapsed / 100) / 10} seconds`);
+        if (time_elapsed >= 1000) Log.log('initialized-in-0-seconds', [Math.floor(time_elapsed / 100) / 10]);
     }
     newPreparationContext() {
         return {
@@ -466,9 +462,9 @@ export class Interpreter {
         return null;
     }
     getSectionIndex(name: string, allow_private = false) {
-        let id = this.template.sections[name];
-        let index = this.template.template[id];
-        return (this.routines[id] && (this.template.params[id].public || allow_private)) ? index : -1;
+        let id = this.template.sectionName2Id[name];
+        let index = this.template.sectionId2GroupIndex[id];
+        return (this.routines[id] && (this.template.params[id].is_public || allow_private)) ? index : -1;
     }
     hasSection(name: string, allow_private = false) {
         return this.getSectionIndex(name, allow_private) !== -1;

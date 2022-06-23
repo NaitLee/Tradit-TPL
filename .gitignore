@@ -2,7 +2,7 @@
 *.tpl.*.json
 *.js.map
 !bare.tpl
-#dist
+dist
 dist/*.wasm.map
 dist/*.wat
 debug
